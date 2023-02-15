@@ -26,5 +26,5 @@ def get_db() -> mysql.connector.CMySQLConnection:
 def get_events(mon_id:int, start:datetime, end:datetime) -> list:
     db = get_db()
     crs = db.cursor(dictionary=True)
-    crs.execute(f"SELECT Name, StartDateTime, EndDateTime, Width, Height, `Length`, Frames, DefaultVideo FROM Events WHERE MonitorId = {mon_id} AND StartDateTime > '{start}' AND EndDateTime < '{end}' ORDER BY id;")
+    crs.execute(f"SELECT MonitorId, StartDateTime, EndDateTime, Width, Height, `Length`, Frames, DefaultVideo FROM Events WHERE MonitorId = {mon_id} AND StartDateTime > '{start}' AND EndDateTime < '{end}' ORDER BY id;")
     return list(crs)
