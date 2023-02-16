@@ -4,16 +4,18 @@ import os
 from datetime import datetime
 import subprocess
 from shutil import rmtree
-
+import logging
+from time import time
 
 load_dotenv()
 
 
 infolder = Path(os.getenv("CONV_IN_PATH")).resolve()
 outfolder = Path(os.getenv("CONV_OUT_PATH")).resolve()
+tempfolder = Path(os.getenv("CONV_TMP_PATH")).resolve() / "zonemerger"
 
 
-def make_outfolder(day:datetime, monitor_left:int, monitor_right:int) -> Path:
+def make_outfolder(monitor_left:int, monitor_right:int) -> Path:
     p = outfolder / f"{monitor_left}_{monitor_right}"
     if not p.exists():
         os.mkdir(str(p))
@@ -21,20 +23,26 @@ def make_outfolder(day:datetime, monitor_left:int, monitor_right:int) -> Path:
         if not p.is_dir():
             os.unlink(str(p))
             os.mkdir(str(p))
-    pc = p / day.strftime("%Y_%m_%d")
-    if not pc.is_dir():
-        os.mkdir(str(pc))
-    return pc
+    return p
+
+
+def init():
+    if not tempfolder.exists():
+        os.mkdir(str(tempfolder))
+
+
+def cleanup():
+    rmtree(str(tempfolder))
 
 
 def combine(monitor_left, monitor_right):
     # make a 600s black file to replace missing files with
-    blackfile = outfolder / "black600.mp4"
+    blackfile = tempfolder / "black600.mp4"
     if not blackfile.exists():
         com = f"ffmpeg -y -f lavfi -i \"color=black:s=1920x1080:r=25\" -c:v libx264 -t 600 {blackfile} ;"
         subprocess.run(com, shell=True)
     # clear trash
-    tmp = outfolder / "tmp"
+    tmp = tempfolder / "tmp"
     if tmp.exists():
         rmtree(str(tmp))
     # cap all videos to 10 minutes
@@ -71,10 +79,14 @@ def combine(monitor_left, monitor_right):
     subprocess.run(com.format(vidlist_l, out_l), shell=True)
     subprocess.run(com.format(vidlist_r, out_r), shell=True)
     # finally, merge the videos side by side
-    of = make_outfolder(monitor_left[0]["StartDateTime"], monitor_left[0]["MonitorId"], monitor_right[0]["MonitorId"])
-    outf = of / "output.mp4"
-    com = f"ffmpeg -y -i {out_l} -i {out_r} -filter_complex hstack {outf};"
+    of = make_outfolder(monitor_left[0]["MonitorId"], monitor_right[0]["MonitorId"])
+    outname = monitor_left[0]["StartDateTime"].strftime("%Y_%m_%d-%H_%M_output.mp4")
+    outf = of / outname
+    com = f"ffmpeg -y {os.getenv('CONV_HWACCEL')} -i {out_l} -i {out_r} -filter_complex hstack {os.getenv('CONV_ENCODING')} {outf};"
+    logging.info(f"Running: {com}")
+    start = time()
     subprocess.run(com, shell=True)
+    logging.info(f"ffmpeg command done, took {time()-start:.1f} seconds")
 
 
 def fix_length(mon:int, day:datetime, event_a:dict, event_b:dict) -> list:
@@ -106,7 +118,7 @@ def cap_at_600s(event):
     video = event["DefaultVideo"]
     day = event["StartDateTime"]
     infile = infolder / str(monitor) / day.strftime("%Y-%m-%d") / video.split("-")[0] / video
-    tmp = outfolder / "tmp"
+    tmp = tempfolder / "tmp"
     if not tmp.exists():
         os.mkdir(str(tmp))
     outfile = tmp / video

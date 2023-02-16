@@ -1,11 +1,34 @@
+# zoneminder mysql database conection
 DB_HOST="127.0.0.1"
 DB_PORT=3306
 DB_NAME="zm"
+# user needs at least read access to zm dabe table events
+#
+# CREATE USER 'readonly'@'%' IDENTIFIED BY 'qwer1234';
+# GRANT Select ON zm.Events TO 'readonly'@'%';
+#
 DB_USER="readonly"
 DB_PASS="qwer1234"
+# the event folder of zoneminder
 CONV_IN_PATH="/videoin/events"
+# where the result files are placed
 CONV_OUT_PATH="/videoout"
+# a folder where temporary files are stored, deleted at the end
+CONV_TMP_PATH="/tmp"
+# the first day to be converted
 CONV_START_DAY="2022-07-18"
+# the end day is inclusive
 CONV_END_DAY="2022-09-09"
+# the time range to look up events in
 CONV_TIME_RANGE="07:59 - 18:00"
+# json parsable monitor IDs to be grouped horizontally. Left id will be left on screen
 CONV_MONITOR_PAIRS="[[9,2], [19,17]]"
+# use hardware acceleration or not
+#CONV_HWACCEL=""
+CONV_HWACCEL="-hwaccel cuda"
+# encoding to be used for final video
+# examples
+# empty string is also ok, for defaults (libx264)
+#CONV_ENCODING="-c:v libx265"
+CONV_ENCODING="-c:v hevc_nvenc"
+#CONV_ENCODING=""

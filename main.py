@@ -5,7 +5,7 @@ from datetime import datetime, timedelta
 import db
 import logging
 from pathlib import Path
-from ffmpeg import combine
+import ffmpeg
 
 load_dotenv()
 
@@ -30,6 +30,7 @@ def make_dt(day, time):
 logging.info(f"First Day: {make_dt(start_day, times[0])} - {make_dt(start_day, times[1])}")
 logging.info(f"Last Day: {make_dt(end_day, times[0])} - {make_dt(end_day, times[1])}")
 
+ffmpeg.init()
 while start_day <= end_day:
     start = make_dt(start_day, times[0])
     end = make_dt(start_day, times[1])
@@ -45,6 +46,7 @@ while start_day <= end_day:
         if len(mon_left_ev) != len(mon_right_ev):
             logging.error("!!! Event count is not equal. No implementation for this yet !!!")
             continue
-        combine(mon_left_ev, mon_right_ev)
-    # go to next day for loopin
+        ffmpeg.combine(mon_left_ev, mon_right_ev)
+    # go to next day for looping
     start_day += timedelta(days=1)
+ffmpeg.cleanup()
