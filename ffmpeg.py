@@ -7,7 +7,13 @@ from shutil import rmtree
 import logging
 from time import time
 
-load_dotenv()
+
+this_folder = Path(__file__).resolve().parent
+env = os.getenv("ENV_FILE")
+if env:
+    load_dotenv(env)
+else:
+    load_dotenv()
 
 
 infolder = Path(os.getenv("CONV_IN_PATH")).resolve()

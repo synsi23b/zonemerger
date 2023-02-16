@@ -7,10 +7,15 @@ import logging
 from pathlib import Path
 import ffmpeg
 
-load_dotenv()
 
-this_file = Path(__file__).resolve()
-log = this_file.parent / "logs" / f"{int(datetime.now().timestamp())}.log"
+this_folder = Path(__file__).resolve().parent
+env = os.getenv("ENV_FILE")
+if env:
+    load_dotenv(str(this_folder / env))
+    log = this_folder / "logs" / f"{env.replace('.', '')}_{int(datetime.now().timestamp())}.log"
+else:
+    load_dotenv()
+    log = this_folder / "logs" / f"env_{int(datetime.now().timestamp())}.log"
 logging.basicConfig(format='%(asctime)s %(levelname)s: %(message)s', filename=str(log),level=logging.INFO)
 
 

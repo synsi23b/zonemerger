@@ -2,7 +2,15 @@ import mysql.connector
 from dotenv import load_dotenv
 import os
 from datetime import datetime
+from pathlib import Path
 
+
+this_folder = Path(__file__).resolve().parent
+env = os.getenv("ENV_FILE")
+if env:
+    load_dotenv(env)
+else:
+    load_dotenv()
 
 
 _db = None

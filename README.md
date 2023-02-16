@@ -7,3 +7,11 @@
 5. launch `python3 main.py`
 
 logs can be found in the log folder, errors and crashes are not caught. Problems with ffmpeg halt the exectution
+
+multiple processes can run at the same time if the environment variable specifying the env file is set
+the file searched for inside this folder
+
+```bash
+export ENV_FILE my_second_env
+python3 main.py
+```
