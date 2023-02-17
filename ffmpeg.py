@@ -19,7 +19,7 @@ else:
 infolder = Path(os.getenv("CONV_IN_PATH")).resolve()
 outfolder = Path(os.getenv("CONV_OUT_PATH")).resolve()
 tempfolder = Path(os.getenv("CONV_TMP_PATH")).resolve() / "zonemerger"
-
+blackfile = this_folder / "black600.mp4"
 
 def make_outfolder(monitor_left:int, monitor_right:int) -> Path:
     p = outfolder / f"{monitor_left}_{monitor_right}"
@@ -43,10 +43,10 @@ def cleanup():
 
 def combine(monitor_left, monitor_right):
     # make a 600s black file to replace missing files with
-    blackfile = tempfolder / "black600.mp4"
-    if not blackfile.exists():
-        com = f"ffmpeg -y -f lavfi -i \"color=black:s=1920x1080:r=25\" -c:v libx264 -t 600 {blackfile} ;"
-        subprocess.run(com, shell=True)
+    #blackfile = tempfolder / "black600.mp4"
+    #if not blackfile.exists():
+    #    com = f"ffmpeg -y -f lavfi -i \"color=black:s=1920x1080:r=25\" -c:v libx264 -t 600 {blackfile} ;"
+    #    subprocess.run(com, shell=True)
     # clear trash
     tmp = tempfolder / "tmp"
     if tmp.exists():
