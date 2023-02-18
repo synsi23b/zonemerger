@@ -3,7 +3,7 @@ from dotenv import load_dotenv
 import os
 from datetime import datetime
 import subprocess
-from shutil import rmtree
+from shutil import rmtree, copy
 import logging
 from time import time
 
@@ -84,8 +84,14 @@ def combine(monitor_left, monitor_right):
     out_r = tmp / "out_r.mp4"
     subprocess.run(com.format(vidlist_l, out_l), shell=True)
     subprocess.run(com.format(vidlist_r, out_r), shell=True)
-    # finally, merge the videos side by side
+    # create destination folder on the NAS
     of = make_outfolder(monitor_left[0]["MonitorId"], monitor_right[0]["MonitorId"])
+    # copy intermediate left / right videos to the NAS, too
+    outleft = of / monitor_left[0]["StartDateTime"].strftime("%Y_%m_%d-%H_%M_left.mp4")
+    outright = of / monitor_left[0]["StartDateTime"].strftime("%Y_%m_%d-%H_%M_right.mp4")
+    copy(str(out_l), str(outleft))
+    copy(str(out_r), str(outright))
+    # finally, merge the videos side by side
     outname = monitor_left[0]["StartDateTime"].strftime("%Y_%m_%d-%H_%M_output.mp4")
     outf = of / outname
     com = f"ffmpeg -y {os.getenv('CONV_HWACCEL')} -i {out_l} -i {out_r} -filter_complex hstack {os.getenv('CONV_ENCODING')} {outf};"
